@@ -1,0 +1,7 @@
+---
+vmware_host: "192.168.1.10"
+vmware_user: "administrator@vsphere.local"
+vmware_password: "your_password"
+vmware_datacenter: "Datacenter"
+vmware_cluster: "Cluster"
+vmware_datastore: "Datastore"

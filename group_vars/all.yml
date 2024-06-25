@@ -1,0 +1,9 @@
+# group_vars/all.yml
+
+vmware_host: "192.168.1.10"
+vmware_user: "administrator@vsphere.local"
+vmware_password: "your_password"
+vmware_datacenter: "Datacenter"
+vmware_cluster: "Cluster"
+vmware_datastore: "Datastore"
+ontap_select_image: "path_to_ontap_select_image"

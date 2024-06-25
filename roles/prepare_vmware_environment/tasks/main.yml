@@ -1,0 +1,34 @@
+# roles/prepare_vmware_environment
+
+---
+- name: Ensure VMware tools are installed
+  yum:
+    name: open-vm-tools
+    state: present
+
+- name: Create VM for ONTAP Select
+  vmware_guest:
+    hostname: "{{ vmware_host }}"
+    username: "{{ vmware_user }}"
+    password: "{{ vmware_password }}"
+    validate_certs: no
+    name: "ONTAP_Select_Node"
+    state: poweredon
+    template: "ONTAP_Template"
+    cluster: "{{ vmware_cluster }}"
+    datacenter: "{{ vmware_datacenter }}"
+    datastore: "{{ vmware_datastore }}"
+    hardware:
+      memory_mb: 8192
+      num_cpus: 4
+      disk:
+      - size_gb: 100
+        type: thin
+      network:
+      - name: "VM Network"
+    wait_for_ip_address: yes
+  register: deploy
+
+- name: Set ONTAP node IP address
+  set_fact:
+    ontap_ip: "{{ deploy.instance.ipv4 }}"

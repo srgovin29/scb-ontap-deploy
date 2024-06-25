@@ -1,0 +1,3 @@
+---
+ontap_select_image: "path_to_ontap_select_image"
+ontap_cluster_name: "ONTAP_Cluster"
