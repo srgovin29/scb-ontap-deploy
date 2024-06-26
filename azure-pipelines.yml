@@ -1,66 +1,72 @@
-# azure-pipelines.yml
-
 trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: Mac-Ubuntu2204
 
 variables:
-  includeInstallSteps: true  # Set this to false to skip installation steps
-  vmware_server: 'your_vmware_server'
-  vmware_user: 'your_vmware_user'
-  vmware_password: 'your_vmware_password'
-  ontap_select_ova_url: 'your_ontap_select_ova_url'
-  ontap_select_license_key: 'your_license_key'
+  includeInstallSteps: false  # Set this to true to include installation steps
 
 stages:
 - stage: PrepareAgent
   jobs:
-  - job: InstallDependencies
-    displayName: 'Install dependencies on agent'
+  - job: PrepareAgentMachine
     steps:
-    - task: UsePythonVersion@0
+    - ${{ if eq(variables.includeInstallSteps, 'true') }}:
+      - template: templates/install_dependencies.yml
+
+    - task: Bash@3
+      displayName: 'List contents of source directory'
       inputs:
-        versionSpec: '3.10.12'
-        addToPath: true
+        targetType: 'inline'
+        script: |
+          ls -la $(Build.SourcesDirectory)
 
-    - script: |
-        sudo apt-get update
-        sudo apt-get -y install python3-pip
-        python3 -m pip install --upgrade pip
-      displayName: 'Install system dependencies and pip'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
-    - script: |
-        pip3 install ansible
-        ansible-galaxy collection install community.vmware
-      displayName: 'Install Ansible and VMware collection'
+    - task: Bash@3
+      displayName: 'List contents of artifact staging directory'
+      inputs:
+        targetType: 'inline'
+        script: |
+          ls -la $(Build.ArtifactStagingDirectory)
 
-- stage: SetupVMware
-  dependsOn: PrepareAgent
+- stage: PrepareVMware
   jobs:
-  - job: ConfigureVMware
-    displayName: 'Configure VMware environment'
+  - job: PrepareVMwareEnvironment
     steps:
-    - script: |
-        echo "[defaults]" > ansible.cfg
-        echo "host_key_checking = False" >> ansible.cfg
-        echo "[vmware_host]" > inventory
-        echo "your_vmware_host ansible_host=${vmware_server} ansible_user=${vmware_user} ansible_password=${vmware_password}" >> inventory
-      displayName: 'Prepare Ansible inventory and configuration'
-
-    - script: |
-        ansible-playbook -i inventory playbooks/vmware_setup.yml
-      displayName: 'Run VMware setup playbook'
+    - task: Bash@3
+      displayName: 'Run Prepare VMware Playbook'
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(Build.ArtifactStagingDirectory)
+          ansible-playbook -i inventory/hosts site.yml --tags prepare_vmware
 
 - stage: DeployONTAPSelect
-  dependsOn: SetupVMware
   jobs:
-  - job: DeployONTAP
-    displayName: 'Deploy ONTAP Select'
+  - job: DeployONTAPSelect
     steps:
-    - script: |
-        ansible-playbook -i inventory playbooks/deploy_ontap_select.yml \
-          -e "ontap_select_ova_url=${ontap_select_ova_url}" \
-          -e "ontap_select_license_key=${ontap_select_license_key}"
-      displayName: 'Run ONTAP Select deployment playbook'
+    - task: Bash@3
+      displayName: 'Run Deploy ONTAP Select Playbook'
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(Build.ArtifactStagingDirectory)
+          ansible-playbook -i inventory/hosts site.yml --tags deploy_ontap_select
+
+- stage: CreateONTAPCluster
+  jobs:
+  - job: CreateONTAPCluster
+    steps:
+    - task: Bash@3
+      displayName: 'Run Create ONTAP Cluster Playbook'
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd $(Build.ArtifactStagingDirectory)
+          ansible-playbook -i inventory/hosts site.yml --tags create_ontap_cluster

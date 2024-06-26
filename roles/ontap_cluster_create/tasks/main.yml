@@ -1,0 +1,15 @@
+# roles/ontap_cluster_create/tasks/main.yml
+
+---
+- name: Create ONTAP Cluster
+  tasks:
+    - name: Create ONTAP Cluster
+      na_ontap_cluster:
+        hostname: "{{ mgmt_ip }}"
+        username: "{{ ontap_username }}"
+        password: "{{ ontap_password }}"
+        cluster_name: "{{ cluster_name }}"
+        node_mgmt_list: "{{ node_mgmt_list }}"
+        cluster_mgmt_ip: "{{ cluster_mgmt_ip }}"
+        cluster_mgmt_gateway: "{{ cluster_mgmt_gateway }}"
+        cluster_mgmt_netmask: "{{ cluster_mgmt_netmask }}"

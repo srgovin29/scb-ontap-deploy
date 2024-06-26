@@ -1,0 +1,34 @@
+# roles/ontap_select_deploy/tasks/main.yml
+
+---
+- name: Deploy ONTAP Select
+  tasks:
+    - name: Download ONTAP Select Deploy
+      get_url:
+        url: "{{ ontap_select_deploy_url }}"
+        dest: /tmp/ontap_select_deploy.zip
+
+    - name: Unzip ONTAP Select Deploy
+      unarchive:
+        src: /tmp/ontap_select_deploy.zip
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Install ONTAP Select Deploy
+      shell: |
+        cd /tmp/ontap_select_deploy
+        ./install.sh
+
+    - name: Deploy ONTAP Select
+      include_tasks: /tmp/ontap_select_deploy/tasks/main.yml
+      vars:
+        ots_vm_name: "{{ vm_name }}"
+        ots_datastore_name: "{{ datastore_name }}"
+        ots_network_name: "{{ network_name }}"
+        ots_license_file: "{{ license_file }}"
+        ots_password: "{{ ots_password }}"
+        ots_cluster_name: "{{ cluster_name }}"
+        ots_mgmt_ip: "{{ mgmt_ip }}"
+        ots_node_ip: "{{ node_ip }}"
+        ots_gateway: "{{ gateway }}"
+        ots_netmask: "{{ netmask }}"
