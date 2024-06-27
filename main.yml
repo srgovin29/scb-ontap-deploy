@@ -1,12 +1,16 @@
-# main.yml
-
 ---
-- name: Prepare VMware environment
-  hosts: vmware_hosts
+- name: Prepare VMware Environment
+  hosts: localhost
   roles:
-    - prepare_vmware_environment
+    - prepare_vmware
+  tags: prepare_vmware
 
 - name: Deploy ONTAP Select
-  hosts: ontap_nodes
+  hosts: localhost
   roles:
     - deploy_ontap_select
+
+- name: Deploy Cluster
+  hosts: localhost
+  roles:
+    - deploy_cluster

@@ -1,0 +1,9 @@
+# roles/ontap_cluster/tasks/deploy_1_node_cluster.yml
+
+---
+- name: Deploy 1-node ONTAP cluster
+  hosts: cluster_nodes
+  tasks:
+    - name: Deploying 1-node cluster
+      debug:
+        msg: "Deploying 1-node ONTAP cluster on {{ inventory_hostname }}"

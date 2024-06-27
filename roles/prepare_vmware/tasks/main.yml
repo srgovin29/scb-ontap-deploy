@@ -1,47 +1,23 @@
 # roles/prepare_vmware/tasks/main.yml
 
 ---
-- name: Prepare VMware Environment
-  hosts: localhost
-  tasks:
-    - name: Gather information about the VMware environment
-      vmware_guest_info:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: no
-      register: vmware_info
+- name: Create resource pool
+  vmware_resource_pool:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    cluster: "{{ cluster_name }}"
+    resource_pool: "ONTAP_Resource_Pool"
+    state: present
+  delegate_to: localhost
 
-    - name: Create a VM for ONTAP Select
-      vmware_guest:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: no
-        datacenter: "{{ datacenter }}"
-        cluster: "{{ cluster }}"
-        name: "{{ vm_name }}"
-        template: "{{ template_name }}"
-        datastore: "{{ vmware_datastore }}"
-        # hardware:
-        #   memory_mb: 8192
-        #   num_cpus: 4
-        #   disk:
-        #   - size_gb: 100
-        #     type: thin
-        #   network:
-        #   - name: "VM Network"
-        # wait_for_ip_address: yes
-        state: poweredon
-      register: vm_deployment
-    - name: Set ONTAP node IP address
-      set_fact:
-        ontap_ip: "{{ vm_deployment.instance.ipv4 }}"
-
-
-
-# - name: Ensure VMware tools are installed
-#   yum:
-#     name: open-vm-tools
-#     state: present
-
+- name: Create VM folder
+  vmware_folder:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ datacenter_name }}"
+    folder: "ONTAP_VMs"
+    state: present
+  delegate_to: localhost

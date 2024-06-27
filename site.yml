@@ -2,17 +2,16 @@
 - name: Prepare VMware Environment
   hosts: localhost
   roles:
-    - role: prepare_vmware
-      tags: prepare_vmware
+    - prepare_vmware
 
 - name: Deploy ONTAP Select
-  hosts: localhost
+  hosts: all_vm_nodes
   roles:
-    - role: ontap_select_deploy
-      tags: deploy_ontap_select
+    - ontap_select_deploy
 
-- name: Create ONTAP Cluster
+- name: Deploy ONTAP Cluster
   hosts: localhost
   roles:
-    - role: ontap_cluster_create
-      tags: create_ontap_cluster
+    - ontap_cluster
+  vars:
+    cluster_size: "{{ cluster_size }}"

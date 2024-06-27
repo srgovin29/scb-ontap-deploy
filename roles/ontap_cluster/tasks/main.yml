@@ -1,0 +1,13 @@
+# roles/ontap_cluster_create/tasks/main.yml
+
+---
+- name: Deploy ONTAP Cluster
+  hosts: localhost
+  tasks:
+    - name: Include the selected cluster deployment playbook
+      include_tasks: "deploy_{{ cluster_size }}_node_cluster.yml"
+      vars:
+        cluster_size: "{{ cluster_size }}"
+
+    - name: Create ONTAP Cluster
+      include_tasks: create_ontap_cluster.yml

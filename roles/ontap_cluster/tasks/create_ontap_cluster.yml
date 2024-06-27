@@ -1,7 +1,6 @@
-# roles/ontap_cluster_create/tasks/main.yml
-
 ---
 - name: Create ONTAP Cluster
+  hosts: cluster_nodes
   tasks:
     - name: Create ONTAP Cluster
       na_ontap_cluster:

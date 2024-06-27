@@ -17,7 +17,7 @@ node_ip: "192.168.1.101"
 gateway: "192.168.1.1"
 netmask: "255.255.255.0"
 ontap_username: "admin"
-ontap_password: "admin_password"
+admin_password: "admin_password"
 node_mgmt_list:
   - node1_ip: "192.168.1.101"
   - node2_ip: "192.168.1.102"
@@ -25,3 +25,9 @@ cluster_mgmt_ip: "192.168.1.103"
 cluster_mgmt_gateway: "192.168.1.1"
 cluster_mgmt_netmask: "255.255.255.0"
 ontap_select_deploy_url: "https://github.com/NetApp/ansible/archive/refs/heads/master.zip"
+ontap_select_image: "ONTAPSelect_deploy_image"
+
+vm_specs:
+  cpu: 2
+  ram: 8192
+  disk: 100

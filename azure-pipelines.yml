@@ -2,10 +2,10 @@ trigger:
 - main
 
 pool:
-  name: Mac-Ubuntu2204
+  vmImage: 'ubuntu-latest'
 
 variables:
-  includeInstallSteps: false  # Set this to true to include installation steps
+  includeInstallSteps: false  # Set this to false to skip installation steps
 
 stages:
 - stage: PrepareAgent
@@ -35,16 +35,15 @@ stages:
         script: |
           ls -la $(Build.ArtifactStagingDirectory)
 
-- stage: PrepareVMware
+- stage: PrepareVMwareEnvironment
   jobs:
-  - job: PrepareVMwareEnvironment
+  - job: PrepareVMware
     steps:
     - task: Bash@3
-      displayName: 'Run Prepare VMware Playbook'
+      displayName: 'Prepare VMware Environment'
       inputs:
         targetType: 'inline'
         script: |
-          cd $(Build.ArtifactStagingDirectory)
           ansible-playbook -i inventory/hosts site.yml --tags prepare_vmware
 
 - stage: DeployONTAPSelect
@@ -52,21 +51,19 @@ stages:
   - job: DeployONTAPSelect
     steps:
     - task: Bash@3
-      displayName: 'Run Deploy ONTAP Select Playbook'
+      displayName: 'Deploy ONTAP Select'
       inputs:
         targetType: 'inline'
         script: |
-          cd $(Build.ArtifactStagingDirectory)
           ansible-playbook -i inventory/hosts site.yml --tags deploy_ontap_select
 
-- stage: CreateONTAPCluster
+- stage: DeployCluster
   jobs:
-  - job: CreateONTAPCluster
+  - job: DeployCluster
     steps:
     - task: Bash@3
-      displayName: 'Run Create ONTAP Cluster Playbook'
+      displayName: 'Deploy ONTAP Cluster'
       inputs:
         targetType: 'inline'
         script: |
-          cd $(Build.ArtifactStagingDirectory)
-          ansible-playbook -i inventory/hosts site.yml --tags create_ontap_cluster
+          ansible-playbook -i inventory/hosts site.yml --tags deploy_cluster -e cluster_size=$(ClusterSize)
